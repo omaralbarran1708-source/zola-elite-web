@@ -8,80 +8,131 @@ import pandas as pd
 import requests
 import streamlit as st
 
-st.set_page_config(
-    page_title="ZOLA Elite",
-    page_icon="⚽",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+st.set_page_config(page_title="ZOLA Elite", page_icon="⚽", layout="wide", initial_sidebar_state="collapsed")
 
-API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY", "")
-THE_ODDS_API_KEY = os.getenv("THE_ODDS_API_KEY", "")
-SPORTMONKS_API_TOKEN = os.getenv("SPORTMONKS_API_TOKEN", "")
-APP_LOGO_URL = os.getenv("APP_LOGO_URL", "")
-
-st.markdown("""
+# ----------------------------
+# THEME / CSS
+# ----------------------------
+st.markdown(
+    """
 <style>
 :root{
-  --bg:#eef3ff;
-  --surface:#ffffff;
-  --surface-2:#f7f9ff;
-  --line:#dbe5ff;
-  --text:#0e1a36;
-  --muted:#67789b;
-  --brand:#1f4ddb;
-  --brand-2:#0f3bbf;
-  --success:#0f9f62;
-  --warn:#d89a00;
+  --bg:#eef3fb;
+  --panel:#ffffff;
+  --line:#d9e3f2;
+  --text:#0f172a;
+  --muted:#64748b;
+  --brand:#1d4ed8;
+  --brand2:#2563eb;
+  --green:#10b981;
+  --red:#ef4444;
+  --orange:#f59e0b;
+  --soft:#f8fbff;
 }
-.stApp{background:linear-gradient(180deg,#eef3ff 0%,#f8fbff 100%);color:var(--text);}
-.block-container{max-width:1380px;padding-top:.9rem;padding-bottom:2rem;}
-header[data-testid="stHeader"]{background:transparent;}
+html, body, [class*="css"]  { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.stApp{background:linear-gradient(180deg,#eff4fb 0%,#edf2fa 100%); color:var(--text);}
+.block-container{max-width:1380px;padding-top:0.7rem;padding-bottom:2rem;}
 section[data-testid="stSidebar"]{display:none;}
-div[data-testid="stToolbar"]{right:1rem;}
-.hero{background:linear-gradient(90deg,var(--brand),#2a60ff);border-radius:22px;padding:1rem 1.2rem;color:white;box-shadow:0 18px 40px rgba(31,77,219,.22);}
-.hero-grid{display:grid;grid-template-columns:1.4fr .8fr;gap:1rem;align-items:center;}
-.hero h1{margin:0;font-size:2.05rem;color:white;font-weight:800;}
-.hero p{margin:.35rem 0 0 0;color:#e9efff;}
-.top-badges{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:.75rem;}
-.badge{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);padding:.3rem .6rem;border-radius:999px;font-size:.82rem;color:white;}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1rem;box-shadow:0 10px 28px rgba(23,42,99,.07);}
-.section-title{font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:.65rem;}
-.meta{color:var(--muted);font-size:.92rem;}
-.fixture-row{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1rem;box-shadow:0 10px 28px rgba(23,42,99,.07);}
-.fixture-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;}
-.teams-grid{display:grid;grid-template-columns:1fr 120px 1fr;gap:1rem;align-items:center;}
-.team-box{text-align:center;padding:.7rem;border-radius:18px;background:var(--surface-2);border:1px solid var(--line);}
-.team-box img{height:58px;max-width:58px;display:block;margin:0 auto .45rem auto;}
-.team-name{font-size:1.2rem;font-weight:800;color:var(--text);}
-.team-sub{font-size:.88rem;color:var(--muted);}
-.center-box{text-align:center;}
-.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem;}
-.odds-card{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:.85rem;text-align:center;}
-.odds-card .label{font-size:.82rem;color:var(--muted);text-transform:uppercase;font-weight:700;}
-.odds-card .value{font-size:1.5rem;font-weight:800;color:var(--text);margin-top:.2rem;}
-.odds-card .sub{font-size:.82rem;color:var(--muted);margin-top:.15rem;}
-.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;}
-.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:.9rem;}
-.stat-card .k{font-size:.82rem;color:var(--muted);text-transform:uppercase;font-weight:700;}
-.stat-card .v{font-size:1.4rem;font-weight:800;color:var(--text);margin-top:.2rem;}
-.market-table table{width:100%;border-collapse:collapse;}
-.market-table th,.market-table td{padding:.75rem;border-bottom:1px solid var(--line);text-align:left;}
-.market-table th{font-size:.82rem;color:var(--muted);text-transform:uppercase;}
-.market-table td:last-child,.market-table th:last-child{text-align:right;}
-.signal{padding:.8rem 1rem;border-radius:16px;margin-bottom:.5rem;border:1px solid var(--line);}
-.signal.good{background:#effcf6;border-color:#caeddc;color:#0c7e50;}
-.signal.warn{background:#fff9eb;border-color:#f6e2a3;color:#946a00;}
-.signal.info{background:#eef4ff;border-color:#d5e2ff;color:#2550d9;}
-.note{padding:.85rem 1rem;border-radius:16px;background:#eef4ff;border:1px solid #d5e2ff;color:#254eb3;}
-.footer-note{font-size:.9rem;color:var(--muted);}
+header[data-testid="stHeader"]{background:transparent;}
+#MainMenu, footer {visibility:hidden;}
+
+.z-topbar{
+  background:linear-gradient(90deg,#1f4ed8 0%,#285ee8 70%,#2b63ef 100%);
+  color:white; border-radius:20px; padding:18px 22px; box-shadow:0 16px 36px rgba(29,78,216,.16);
+  margin-bottom:18px; border:1px solid rgba(255,255,255,.18);
+}
+.z-topbar-row{display:flex; justify-content:space-between; align-items:center; gap:16px;}
+.z-brand{display:flex; align-items:center; gap:12px;}
+.z-brand-badge{
+  width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.28); backdrop-filter: blur(4px);
+}
+.z-brand-title{font-size:2rem;font-weight:900;line-height:1;letter-spacing:.01em;}
+.z-brand-sub{font-size:.95rem;opacity:.92;margin-top:4px;}
+.z-topbar-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+.z-chip{
+  display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 12px; font-size:.82rem;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:white;
+}
+.z-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:16px 16px 14px 16px;
+  box-shadow:0 8px 22px rgba(15,23,42,.04);
+}
+.z-card-title{font-weight:800; font-size:1.05rem; margin-bottom:10px; color:#0b1326;}
+.z-muted{color:var(--muted);}
+.z-match-head{
+  background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:16px; box-shadow:0 8px 22px rgba(15,23,42,.04);
+}
+.z-match-grid{display:grid; grid-template-columns: 1.2fr .9fr 1.2fr; gap:16px; align-items:center;}
+.z-team-box{text-align:center;}
+.z-team-name{font-weight:900; font-size:1.55rem; color:#0f172a; line-height:1.15;}
+.z-team-sub{color:var(--muted); font-size:.92rem; margin-top:6px;}
+.z-center-box{text-align:center;}
+.z-kick{font-size:2rem; font-weight:900; color:#0f172a;}
+.z-meta{color:var(--muted); font-size:.95rem; margin-top:4px;}
+.z-league{display:flex; justify-content:center; align-items:center; gap:8px; color:#0f172a; font-weight:700; margin-bottom:10px;}
+.z-outcome-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px;}
+.z-outcome{
+  background:#f8fbff; border:1px solid #d8e6ff; border-radius:18px; padding:14px 10px; text-align:center;
+}
+.z-outcome b{display:block; font-size:1.9rem; color:#0f172a; margin-top:6px;}
+.z-outcome span{font-size:.88rem; color:#5974a3; font-weight:800; letter-spacing:.03em;}
+.z-score-pill{
+  display:inline-flex; align-items:center; justify-content:center; background:#f0f7ff; border:1px solid #cfe2ff; color:#0f172a;
+  border-radius:999px; padding:10px 18px; font-weight:900; font-size:1.2rem;
+}
+.z-pill-win{background:#ecfdf5;border-color:#b7f0d3;color:#065f46;}
+.z-pill-draw{background:#fff7ed;border-color:#fed7aa;color:#9a3412;}
+.z-pill-loss{background:#fef2f2;border-color:#fecaca;color:#991b1b;}
+.z-statline{margin-bottom:14px;}
+.z-statline-top{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:6px;}
+.z-statbar{height:10px;background:#edf2f9;border-radius:999px;overflow:hidden;border:1px solid #d8e0ec;}
+.z-statbar-fill{height:100%;background:linear-gradient(90deg,#2563eb,#3b82f6);border-radius:999px;}
+.z-alert{
+  border-radius:16px; padding:14px 16px; margin-top:10px; font-size:1rem; line-height:1.45; border:1px solid #dbeafe; background:#eff6ff; color:#1d4ed8;
+}
+.z-alert.good{background:#ecfdf5;border-color:#b7f0d3;color:#166534;}
+.z-alert.warn{background:#fff7ed;border-color:#fed7aa;color:#b45309;}
+.z-market-best{
+  background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%); color:white; border-radius:18px; padding:16px; border:1px solid #1e3a8a;
+}
+.z-market-best small{color:#cbd5e1;}
+.z-mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.z-mini-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;}
+.z-mini-card .k{font-size:.82rem;color:#64748b;font-weight:800;letter-spacing:.03em;}
+.z-mini-card .v{font-size:1.95rem;font-weight:900;color:#0f172a;margin-top:8px;}
+.z-table-wrap table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;}
+.z-table-wrap th,.z-table-wrap td{padding:12px 12px;border-bottom:1px solid #e6edf7;text-align:left;font-size:.95rem;}
+.z-table-wrap thead th{background:#f8fbff;color:#58719a;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;}
+.z-table-wrap tr:last-child td{border-bottom:none;}
+img.z-logo-mini{max-height:40px; width:auto; display:block; margin:auto;}
+img.z-team-logo{max-height:72px; width:auto; display:block; margin:0 auto 10px auto;}
+img.z-league-logo{max-height:24px; width:auto;}
+div[data-testid="stHorizontalBlock"] > div:has(> div > .z-card){height:100%;}
+.stButton>button{
+  background:linear-gradient(90deg,#ef4444,#ff5a5f)!important; color:white!important; border:none!important; border-radius:14px!important;
+  font-weight:800!important; min-height:46px;
+}
+.stTextInput input, .stNumberInput input, .stDateInput input,
+.stSelectbox [data-baseweb="select"] > div, .stTextArea textarea{
+  background:#fff!important;border:1px solid #d9e3f2!important;border-radius:14px!important;color:#0f172a!important;
+}
+.stToggle label{font-weight:700;}
+[data-testid="column"] .stImage img{border-radius:16px;}
 </style>
-""", unsafe_allow_html=True)
-DEFAULT_BANKROLL = 1000.0
+    """,
+    unsafe_allow_html=True,
+)
+
+# ----------------------------
+# CONFIG / CONSTANTS
+# ----------------------------
 API_FOOTBALL_BASE = os.getenv("API_FOOTBALL_BASE_URL", "https://v3.football.api-sports.io")
 ODDS_API_BASE = os.getenv("ODDS_API_BASE_URL", "https://api.the-odds-api.com/v4")
 LIMA_TZ = "America/Lima"
 HISTORY_FILE = "zola_match_history.csv"
+DEFAULT_BANKROLL = 1000.0
+LOGO_CREST_PATH = "zola_crest.png"
 
 TEAM_PRIORS = {
     "palmeiras": {"elo": 1875, "form": 2.35, "attack": 2.05, "defense": 0.78},
@@ -108,18 +159,43 @@ TEAM_CONTEXT = {
     "universitario": {"lat": -12.0464, "lon": -77.0428, "crowd": 0.82},
 }
 SPORT_KEY_SUGGESTIONS = [
-    "soccer_conmebol_libertadores","soccer_conmebol_sudamericana","soccer_uefa_champs_league",
-    "soccer_spain_la_liga","soccer_epl","soccer_italy_serie_a","soccer_germany_bundesliga",
-    "soccer_france_ligue_one","soccer_brazil_campeonato",
+    "soccer_conmebol_libertadores", "soccer_conmebol_sudamericana", "soccer_uefa_champs_league",
+    "soccer_spain_la_liga", "soccer_epl", "soccer_italy_serie_a", "soccer_germany_bundesliga",
+    "soccer_france_ligue_one", "soccer_brazil_campeonato",
 ]
 PREMIUM_KEYWORDS = [
-    "libertadores","sudamericana","champions","europa league","premier","la liga","serie a",
-    "bundesliga","ligue 1","brasileirao","campeonato brasileiro","argentina","mls","liga mx",
-    "afc champions","caf champions","world cup","copa america","euro","nations league"
+    "libertadores", "sudamericana", "champions", "europa league", "premier", "la liga", "serie a",
+    "bundesliga", "ligue 1", "brasileirao", "campeonato brasileiro", "argentina", "mls", "liga mx",
+    "afc champions", "caf champions", "world cup", "copa america", "euro", "nations league"
 ]
 
-if "watchlist" not in st.session_state:
-    st.session_state.watchlist = []
+# ----------------------------
+# SESSION STATE
+# ----------------------------
+for key, default in {
+    "watchlist": [],
+    "api_football_key_override": "",
+    "odds_api_key_override": "",
+    "sportmonks_token_override": "",
+    "admin_ok": False,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+# ----------------------------
+# HELPERS
+# ----------------------------
+def current_api_football_key():
+    return st.session_state.api_football_key_override or os.getenv("API_FOOTBALL_KEY", "")
+
+def current_odds_api_key():
+    return st.session_state.odds_api_key_override or os.getenv("THE_ODDS_API_KEY", "")
+
+def current_sportmonks_token():
+    return st.session_state.sportmonks_token_override or os.getenv("SPORTMONKS_API_TOKEN", "")
+
+def admin_password():
+    return os.getenv("ADMIN_PASSWORD", "")
 
 def load_history_file():
     if os.path.exists(HISTORY_FILE):
@@ -200,36 +276,33 @@ def top_scores(matrix, n=10):
     rows.sort(key=lambda x: x[1], reverse=True)
     return rows[:n]
 
-def render_bar(title, value_a, value_b, suffix=""):
-    total = max(value_a + value_b, 1e-9)
-    st.markdown(f"**{title}**")
-    st.progress(value_a / total, text=f"A: {value_a}{suffix} | B: {value_b}{suffix}")
-
 def is_premium_competition(league_name):
     lower = league_name.lower()
     return any(k in lower for k in PREMIUM_KEYWORDS)
 
 def haversine_km(lat1, lon1, lat2, lon2):
     r = 6371.0
-    p = math.pi/180
-    dlat = (lat2-lat1)*p
-    dlon = (lon2-lon1)*p
-    a = math.sin(dlat/2)**2 + math.cos(lat1*p)*math.cos(lat2*p)*math.sin(dlon/2)**2
-    return 2*r*math.asin(math.sqrt(a))
+    p = math.pi / 180
+    dlat = (lat2 - lat1) * p
+    dlon = (lon2 - lon1) * p
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1 * p) * math.cos(lat2 * p) * math.sin(dlon / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
 
 def fatigue_label(km, rest_days):
-    score = km/1500 - rest_days*0.35
-    if score >= 1.8: return "Alta carga"
-    if score >= 0.7: return "Carga media"
-    return "Carga baja"
+    score = km / 1500 - rest_days * 0.35
+    if score >= 1.8:
+        return "Alta"
+    if score >= 0.7:
+        return "Media"
+    return "Baja"
 
 def auto_context(team_a_name, team_b_name, fixture):
     a_key = team_a_name.lower().strip()
     b_key = team_b_name.lower().strip()
     a_ctx = TEAM_CONTEXT.get(a_key, {})
     b_ctx = TEAM_CONTEXT.get(b_key, {})
-    home_name = fixture.get("teams",{}).get("home",{}).get("name","")
-    away_name = fixture.get("teams",{}).get("away",{}).get("name","")
+    home_name = fixture.get("teams", {}).get("home", {}).get("name", "")
+    away_name = fixture.get("teams", {}).get("away", {}).get("name", "")
     is_a_home = similarity(team_a_name, home_name) > similarity(team_a_name, away_name)
     crowd_a = a_ctx.get("crowd", 0.80 if is_a_home else 0.20)
     crowd_b = b_ctx.get("crowd", 0.80 if not is_a_home else 0.20)
@@ -244,14 +317,14 @@ def auto_context(team_a_name, team_b_name, fixture):
     else:
         travel_b = 1200 if not is_a_home else 0
     return {
-        "crowd_a": min(max(crowd_a,0.0),1.0),
-        "crowd_b": min(max(crowd_b,0.0),1.0),
-        "travel_a": max(travel_a,0),
-        "travel_b": max(travel_b,0),
+        "crowd_a": min(max(crowd_a, 0.0), 1.0),
+        "crowd_b": min(max(crowd_b, 0.0), 1.0),
+        "travel_a": max(travel_a, 0),
+        "travel_b": max(travel_b, 0),
         "rest_a": 5,
         "rest_b": 4,
-        "fatigue_a": fatigue_label(max(travel_a,0), 5),
-        "fatigue_b": fatigue_label(max(travel_b,0), 4),
+        "fatigue_a": fatigue_label(max(travel_a, 0), 5),
+        "fatigue_b": fatigue_label(max(travel_b, 0), 4),
     }
 
 def fetch_today_fixtures(api_key, on_date):
@@ -271,13 +344,16 @@ def fetch_events_api_football(api_key, fixture_id):
     return api_get(f"{API_FOOTBALL_BASE}/fixtures/events", headers=headers, params={"fixture": fixture_id}).get("response", [])
 
 def fetch_odds_the_odds_api(api_key, sport_key, team_a, team_b):
-    payload = api_get(f"{ODDS_API_BASE}/sports/{sport_key}/odds", params={"apiKey": api_key, "regions": "eu", "markets": "h2h,totals", "oddsFormat": "decimal", "dateFormat": "iso"})
+    payload = api_get(
+        f"{ODDS_API_BASE}/sports/{sport_key}/odds",
+        params={"apiKey": api_key, "regions": "eu", "markets": "h2h,totals", "oddsFormat": "decimal", "dateFormat": "iso"},
+    )
     best = None
     best_score = 0.0
     for event in payload:
-        home = event.get("home_team","")
-        away = event.get("away_team","")
-        score = max(similarity(team_a, home)+similarity(team_b, away), similarity(team_a, away)+similarity(team_b, home))
+        home = event.get("home_team", "")
+        away = event.get("away_team", "")
+        score = max(similarity(team_a, home) + similarity(team_b, away), similarity(team_a, away) + similarity(team_b, home))
         if score > best_score:
             best_score = score
             best = event
@@ -285,11 +361,11 @@ def fetch_odds_the_odds_api(api_key, sport_key, team_a, team_b):
     if not best or not best.get("bookmakers"):
         return out
     bm = best["bookmakers"][0]
-    out["bookmaker"] = bm.get("title","")
+    out["bookmaker"] = bm.get("title", "")
     for market in bm.get("markets", []):
         key = market.get("key")
         for o in market.get("outcomes", []):
-            nm = o.get("name","")
+            nm = o.get("name", "")
             pr = o.get("price")
             if key == "h2h":
                 if similarity(nm, team_a) > 0.8:
@@ -311,230 +387,396 @@ def infer_team_base(team_name):
         return TEAM_PRIORS[key].copy()
     seed = abs(hash(key)) % 10000
     rng = np.random.default_rng(seed)
-    return {"elo": float(1450+rng.integers(0,240)), "form": float(np.round(rng.uniform(1.2,2.0),2)), "attack": float(np.round(rng.uniform(1.05,1.55),2)), "defense": float(np.round(rng.uniform(1.0,1.45),2))}
+    return {"elo": float(1450 + rng.integers(0, 240)), "form": float(np.round(rng.uniform(1.2, 2.0), 2)), "attack": float(np.round(rng.uniform(1.05, 1.55), 2)), "defense": float(np.round(rng.uniform(1.0, 1.45), 2))}
 
 def lineup_strength(lineups, team_name):
-    default = {"formation":"N/D","starters":11,"bench":7,"attack_bonus":0.0,"defense_bonus":0.0}
+    default = {"formation": "N/D", "starters": 11, "bench": 7, "attack_bonus": 0.0, "defense_bonus": 0.0}
     if not lineups:
         return default
-    best=None; bs=0.0
+    best = None
+    bs = 0.0
     for item in lineups:
-        s = similarity(team_name, item.get("team",{}).get("name",""))
+        s = similarity(team_name, item.get("team", {}).get("name", ""))
         if s > bs:
-            bs=s; best=item
+            bs = s
+            best = item
     if not best:
         return default
-    formation = best.get("formation","N/D")
-    start_xi = best.get("startXI",[]) or []
-    subs = best.get("substitutes",[]) or []
+    formation = best.get("formation", "N/D")
+    start_xi = best.get("startXI", []) or []
+    subs = best.get("substitutes", []) or []
     defenders = midfielders = attackers = 0
     for p in start_xi:
-        pos = str(p.get("player",{}).get("pos","")).upper()
-        if pos=="D": defenders += 1
-        elif pos=="M": midfielders += 1
-        elif pos=="F": attackers += 1
+        pos = str(p.get("player", {}).get("pos", "")).upper()
+        if pos == "D":
+            defenders += 1
+        elif pos == "M":
+            midfielders += 1
+        elif pos == "F":
+            attackers += 1
     return {
         "formation": formation,
         "starters": len(start_xi),
         "bench": len(subs),
-        "attack_bonus": min(0.25, attackers*0.03 + max(midfielders-3,0)*0.01),
-        "defense_bonus": min(0.18, defenders*0.02),
+        "attack_bonus": min(0.25, attackers * 0.03 + max(midfielders - 3, 0) * 0.01),
+        "defense_bonus": min(0.18, defenders * 0.02),
     }
 
 def lineup_readiness(info):
-    if info["formation"] == "N/D": return "Alineación aún no liberada"
-    if info["starters"] >= 11 and info["bench"] >= 7: return "Llega completo"
-    if info["starters"] >= 10: return "Llega competitivo"
-    return "Llega con ajustes"
+    if info["formation"] == "N/D":
+        return "Alineación aún no liberada"
+    if info["starters"] >= 11 and info["bench"] >= 7:
+        return "Plantel completo"
+    if info["starters"] >= 10:
+        return "Plantel competitivo"
+    return "Equipo con ajustes"
 
 def stats_to_dict(stats_rows, team_name):
-    out = {"shots_on_goal":0.0,"total_shots":0.0,"corners":0.0,"possession":50.0,"yellow":0.0,"red":0.0}
+    out = {"shots_on_goal": 0.0, "total_shots": 0.0, "corners": 0.0, "possession": 50.0, "yellow": 0.0, "red": 0.0}
     if not stats_rows:
         return out
-    best=None; bs=0.0
+    best = None
+    bs = 0.0
     for item in stats_rows:
-        s=similarity(team_name, item.get("team",{}).get("name",""))
-        if s>bs:
-            bs=s; best=item
+        s = similarity(team_name, item.get("team", {}).get("name", ""))
+        if s > bs:
+            bs = s
+            best = item
     if not best:
         return out
-    mapping={row.get("type",""):row.get("value") for row in best.get("statistics",[])}
+    mapping = {row.get("type", ""): row.get("value") for row in best.get("statistics", [])}
+
     def clean(v):
-        if isinstance(v,str) and "%" in v:
-            return float(v.replace("%","").strip())
-        try: return float(v)
-        except: return 0.0
-    out["shots_on_goal"]=clean(mapping.get("Shots on Goal",0))
-    out["total_shots"]=clean(mapping.get("Total Shots",0))
-    out["corners"]=clean(mapping.get("Corner Kicks",0))
-    out["possession"]=clean(mapping.get("Ball Possession",50))
-    out["yellow"]=clean(mapping.get("Yellow Cards",0))
-    out["red"]=clean(mapping.get("Red Cards",0))
+        if isinstance(v, str) and "%" in v:
+            return float(v.replace("%", "").strip())
+        try:
+            return float(v)
+        except Exception:
+            return 0.0
+
+    out["shots_on_goal"] = clean(mapping.get("Shots on Goal", 0))
+    out["total_shots"] = clean(mapping.get("Total Shots", 0))
+    out["corners"] = clean(mapping.get("Corner Kicks", 0))
+    out["possession"] = clean(mapping.get("Ball Possession", 50))
+    out["yellow"] = clean(mapping.get("Yellow Cards", 0))
+    out["red"] = clean(mapping.get("Red Cards", 0))
     return out
 
 def build_auto_profile(team_name, lineup_info, stats_info, crowd_factor, travel_km, rest_days, injuries):
     base = infer_team_base(team_name)
-    attack = base["attack"] + lineup_info["attack_bonus"] + min(0.18, stats_info["shots_on_goal"]*0.025) + min(0.10, stats_info["corners"]*0.012)
-    defense = base["defense"] - lineup_info["defense_bonus"] - min(0.12, stats_info["possession"]/100*0.08) + min(0.20, stats_info["red"]*0.08)
-    form = base["form"] + min(0.20, stats_info["total_shots"]*0.01) - min(0.15, stats_info["red"]*0.08)
-    return {"elo": base["elo"], "form": max(0.4,form), "attack": max(0.4,attack), "defense": max(0.4,defense), "injuries": injuries, "rest_days": rest_days, "travel_km": travel_km, "crowd_factor": crowd_factor, "formation": lineup_info["formation"], "starters": lineup_info["starters"], "bench": lineup_info["bench"]}
+    attack = base["attack"] + lineup_info["attack_bonus"] + min(0.18, stats_info["shots_on_goal"] * 0.025) + min(0.10, stats_info["corners"] * 0.012)
+    defense = base["defense"] - lineup_info["defense_bonus"] - min(0.12, stats_info["possession"] / 100 * 0.08) + min(0.20, stats_info["red"] * 0.08)
+    form = base["form"] + min(0.20, stats_info["total_shots"] * 0.01) - min(0.15, stats_info["red"] * 0.08)
+    return {
+        "elo": base["elo"],
+        "form": max(0.4, form),
+        "attack": max(0.4, attack),
+        "defense": max(0.4, defense),
+        "injuries": injuries,
+        "rest_days": rest_days,
+        "travel_km": travel_km,
+        "crowd_factor": crowd_factor,
+        "formation": lineup_info["formation"],
+        "starters": lineup_info["starters"],
+        "bench": lineup_info["bench"],
+    }
 
 def expected_goals(a, b):
-    home_boost = 0.10 + 0.17*a["crowd_factor"]
-    sg = (a["elo"] - b["elo"])/100
-    la = 1.05 + 0.10*sg + 0.18*(a["form"]-b["form"]) + 0.32*(a["attack"]-b["defense"]) + home_boost + 0.025*(a["rest_days"]-b["rest_days"]) - 0.018*a["injuries"] - 0.000025*max(a["travel_km"]-b["travel_km"],0)
-    lb = 0.90 - 0.09*sg - 0.14*(a["form"]-b["form"]) + 0.26*(b["attack"]-a["defense"]) + 0.025*(b["rest_days"]-a["rest_days"]) - 0.018*b["injuries"] - 0.000025*max(b["travel_km"]-a["travel_km"],0)
-    return max(0.15,min(4.2,la)), max(0.10,min(4.0,lb))
+    home_boost = 0.10 + 0.17 * a["crowd_factor"]
+    sg = (a["elo"] - b["elo"]) / 100
+    la = 1.05 + 0.10 * sg + 0.18 * (a["form"] - b["form"]) + 0.32 * (a["attack"] - b["defense"]) + home_boost + 0.025 * (a["rest_days"] - b["rest_days"]) - 0.018 * a["injuries"] - 0.000025 * max(a["travel_km"] - b["travel_km"], 0)
+    lb = 0.90 - 0.09 * sg - 0.14 * (a["form"] - b["form"]) + 0.26 * (b["attack"] - a["defense"]) + 0.025 * (b["rest_days"] - a["rest_days"]) - 0.018 * b["injuries"] - 0.000025 * max(b["travel_km"] - a["travel_km"], 0)
+    return max(0.15, min(4.2, la)), max(0.10, min(4.0, lb))
 
 def dominance_index(stats_a, stats_b):
-    return (stats_a["shots_on_goal"]-stats_b["shots_on_goal"])*0.22 + (stats_a["total_shots"]-stats_b["total_shots"])*0.10 + (stats_a["corners"]-stats_b["corners"])*0.08 + ((stats_a["possession"]-stats_b["possession"])/10)*0.08 - (stats_a["red"]-stats_b["red"])*0.35
+    return (
+        (stats_a["shots_on_goal"] - stats_b["shots_on_goal"]) * 0.22
+        + (stats_a["total_shots"] - stats_b["total_shots"]) * 0.10
+        + (stats_a["corners"] - stats_b["corners"]) * 0.08
+        + ((stats_a["possession"] - stats_b["possession"]) / 10) * 0.08
+        - (stats_a["red"] - stats_b["red"]) * 0.35
+    )
 
-def build_trader_signals(team_a, team_b, p_a,p_d,p_b,p_over,p_under,p_btts, odds, stats_a, stats_b, score_rows):
-    sig=[]
-    dom=dominance_index(stats_a,stats_b)
-    best_score=score_rows[0][0] if score_rows else "N/D"
+def build_trader_signals(team_a, team_b, p_a, p_d, p_b, p_over, p_under, p_btts, odds, stats_a, stats_b, score_rows):
+    sig = []
+    dom = dominance_index(stats_a, stats_b)
+    best_score = score_rows[0][0] if score_rows else "N/D"
     if odds:
-        for market, prob, odd in [(f"{team_a} gana",p_a,odds.get("team_a_win")),("Empate",p_d,odds.get("draw")),(f"{team_b} gana",p_b,odds.get("team_b_win")),("Over 2.5",p_over,odds.get("over_2_5")),("Under 2.5",p_under,odds.get("under_2_5"))]:
-            imp=implied_prob(odd)
+        for market, prob, odd in [
+            (f"{team_a} gana", p_a, odds.get("team_a_win")),
+            ("Empate", p_d, odds.get("draw")),
+            (f"{team_b} gana", p_b, odds.get("team_b_win")),
+            ("Over 2.5", p_over, odds.get("over_2_5")),
+            ("Under 2.5", p_under, odds.get("under_2_5")),
+        ]:
+            imp = implied_prob(odd)
             if odd and not np.isnan(imp):
-                edge=prob-imp
-                if edge>=0.07: sig.append(("good",f"Value detectado en {market}. Prob. modelo {prob:.1%} vs prob. implícita {imp:.1%}."))
-                elif edge<=-0.08: sig.append(("warn",f"Mercado más fuerte que el modelo en {market}."))
-    if dom>=1.2: sig.append(("info",f"Señal live: {team_a} domina claramente el partido por volumen y control."))
-    elif dom<=-1.2: sig.append(("info",f"Señal live: {team_b} está imponiendo condiciones del partido."))
-    if p_a>0.70 and best_score.startswith(("2-","3-","1-0")): sig.append(("good",f"Escenario principal consistente con favorito fuerte: {best_score} para {team_a}."))
-    if p_btts<0.42: sig.append(("info","El modelo ve sesgo a portería a cero de uno de los dos."))
+                edge = prob - imp
+                if edge >= 0.07:
+                    sig.append(("good", f"Valor activo en {market}. Modelo {prob:.1%} vs mercado {imp:.1%}."))
+                elif edge <= -0.08:
+                    sig.append(("warn", f"Mercado más fuerte que el modelo en {market}."))
+    if dom >= 1.2:
+        sig.append(("good", f"{team_a} está dominando el partido por volumen y control."))
+    elif dom <= -1.2:
+        sig.append(("good", f"{team_b} está imponiendo ritmo y ventaja territorial."))
+    if p_a > 0.70 and best_score.startswith(("2-", "3-", "1-0")):
+        sig.append(("good", f"Escenario principal consistente con favorito fuerte: {best_score} para {team_a}."))
+    if p_btts < 0.42:
+        sig.append(("warn", "Sesgo fuerte a portería a cero de uno de los dos."))
     return sig
 
-def best_bet_summary(odds,p_a,p_d,p_b,p_over,p_under,bankroll):
-    opts=[("Victoria equipo A",odds.get("team_a_win"),p_a),("Empate",odds.get("draw"),p_d),("Victoria equipo B",odds.get("team_b_win"),p_b),("Over 2.5",odds.get("over_2_5"),p_over),("Under 2.5",odds.get("under_2_5"),p_under)]
-    best=None; best_ev=-999
-    for label,odd,prob in opts:
-        ev=expected_value(prob,odd)
-        if not np.isnan(ev) and ev>best_ev:
-            best_ev=ev; best=(label,odd,prob,ev,kelly_fraction(prob,odd)*bankroll*0.25)
+def best_bet_summary(odds, p_a, p_d, p_b, p_over, p_under, bankroll):
+    opts = [
+        ("1 - Local", odds.get("team_a_win"), p_a),
+        ("X - Empate", odds.get("draw"), p_d),
+        ("2 - Visita", odds.get("team_b_win"), p_b),
+        ("Over 2.5", odds.get("over_2_5"), p_over),
+        ("Under 2.5", odds.get("under_2_5"), p_under),
+    ]
+    best = None
+    best_ev = -999
+    for label, odd, prob in opts:
+        ev = expected_value(prob, odd)
+        if not np.isnan(ev) and ev > best_ev:
+            best_ev = ev
+            best = (label, odd, prob, ev, kelly_fraction(prob, odd) * bankroll * 0.25)
     return best
 
-def ai_summary_text(team_a, team_b, p_a,p_d,p_b,best_score,signals):
-    lead = "ZOLA detecta un favoritismo claro." if max(p_a,p_b)>0.68 else "ZOLA detecta un partido más competido de lo que parece."
-    sig = signals[0][1] if signals else "No aparece una señal premium dominante todavía."
-    return f"{lead} Escenario base: {best_score}. {sig}"
+def pick_confidence(p_a, p_d, p_b, score_prob):
+    gap = abs(p_a - p_b)
+    if max(p_a, p_b) >= 0.72 and score_prob >= 0.14:
+        return "Alta"
+    if gap >= 0.22:
+        return "Media"
+    return "Competida"
+
+def prediction_class(p_a, p_d, p_b):
+    if p_a > max(p_d, p_b):
+        return "local"
+    if p_b > max(p_a, p_d):
+        return "visita"
+    return "empate"
+
+def prediction_badge(pred_class):
+    if pred_class == "local":
+        return "z-pill-win", "Victoria local"
+    if pred_class == "visita":
+        return "z-pill-loss", "Victoria visita"
+    return "z-pill-draw", "Empate"
+
+def dynamic_ai_prediction(team_a, team_b, p_a, p_d, p_b, best_score, confidence, stats_a, stats_b, odds, best_bet, fixture_status):
+    winner_class = prediction_class(p_a, p_d, p_b)
+    ga, gb = best_score.split("-")
+    if winner_class == "local":
+        headline = f"{team_a} gana {ga}-{gb}"
+        style = "good"
+        reasons = [
+            f"{team_a} llega con el mejor paquete ofensivo y control territorial.",
+            f"La proyección central del modelo marca {best_score} como escenario dominante.",
+        ]
+    elif winner_class == "visita":
+        headline = f"{team_b} gana {ga}-{gb}"
+        style = "good"
+        reasons = [
+            f"{team_b} llega con ventaja de eficiencia ofensiva y respuesta defensiva.",
+            f"El partido se abre hacia {best_score} como desenlace principal.",
+        ]
+    else:
+        headline = f"Empate {ga}-{gb}"
+        style = "warn"
+        reasons = [
+            "Los dos equipos llegan con fuerzas muy cercanas en el modelo central.",
+            f"El cruce se cierra en {best_score} como marcador principal.",
+        ]
+    if stats_a["shots_on_goal"] + stats_b["shots_on_goal"] > 0:
+        if stats_a["shots_on_goal"] > stats_b["shots_on_goal"]:
+            reasons.append(f"{team_a} está produciendo más remates claros al arco.")
+        elif stats_b["shots_on_goal"] > stats_a["shots_on_goal"]:
+            reasons.append(f"{team_b} está generando las ocasiones más limpias del juego.")
+    if best_bet:
+        reasons.append(f"La mejor cuota activa del modelo es {best_bet[0]} @ {best_bet[1]:.2f}.")
+    if fixture_status in {"1H", "2H", "HT", "ET", "BT", "P", "LIVE"}:
+        reasons.append("Lectura en vivo integrada con el estado actual del encuentro.")
+    return headline, confidence, style, reasons[:4]
 
 def pattern_summary(history_df, team_a, team_b):
     if history_df.empty:
-        return "Todavía no hay historial suficiente para detectar patrones aprendidos."
-    subset = history_df[history_df["match"].str.contains(team_a, case=False, na=False) | history_df["match"].str.contains(team_b, case=False, na=False)]
+        return "Sin historial previo guardado en esta instancia."
+    subset = history_df[
+        history_df["match"].str.contains(team_a, case=False, na=False)
+        | history_df["match"].str.contains(team_b, case=False, na=False)
+    ]
     if subset.empty:
-        return "Todavía no hay historial suficiente para detectar patrones aprendidos."
-    n=len(subset)
+        return "Sin enfrentamientos guardados para estos equipos en la instancia actual."
+    n = len(subset)
     if "prediction_hit_exact" in subset.columns and subset["prediction_hit_exact"].notna().any():
         hit = subset["prediction_hit_exact"].fillna(0).mean()
-        return f"ZOLA ya tiene {n} partidos relacionados. Exactitud exacta registrada: {hit:.1%}."
-    return f"ZOLA ya tiene {n} partidos relacionados guardados. Registra más resultados reales para afinar patrones."
+        return f"Historial ZOLA: {n} partidos relacionados y {hit:.1%} de exactitud exacta registrada."
+    return f"Historial ZOLA: {n} partidos guardados."
 
+def local_img(path, cls="z-logo-mini"):
+    if os.path.exists(path):
+        import base64
+        with open(path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
+        return f'<img class="{cls}" src="data:image/png;base64,{encoded}"/>'
+    return ""
 
-history_file_df = load_history_file()
+def remote_img(url, cls):
+    if not url:
+        return ""
+    return f'<img class="{cls}" src="{url}"/>'
 
-def render_signal(level, text):
-    st.markdown(f'<div class="signal {level}">{text}</div>', unsafe_allow_html=True)
+def format_pct(x):
+    return f"{x:.1%}"
 
-def env_status(label, ok):
-    return f"{label}: {'Conectado' if ok else 'Pendiente'}"
+# ----------------------------
+# TOP BAR
+# ----------------------------
+logo_html = local_img(LOGO_CREST_PATH)
+api_ok = bool(current_api_football_key())
+odds_ok = bool(current_odds_api_key())
+sport_ok = bool(current_sportmonks_token())
+status_chip = lambda label, ok: f'<span class="z-chip">{"🟢" if ok else "⚪"} {label}</span>'
 
-logo_html = f'<img src="{APP_LOGO_URL}" style="height:56px;border-radius:12px;background:white;padding:6px;" />' if APP_LOGO_URL else '<div style="height:56px;width:56px;border-radius:14px;background:white;color:#1f4ddb;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;">Z</div>'
-
-st.markdown(f"""
-<div class="hero">
-  <div class="hero-grid">
-    <div>
-      <div style="display:flex;align-items:center;gap:.85rem;">
-        {logo_html}
-        <div>
-          <h1>ZOLA Elite</h1>
-          <p>Lectura de partidos, probabilidades y señales de valor en una interfaz pública más limpia.</p>
-        </div>
-      </div>
-      <div class="top-badges">
-        <span class="badge">{env_status('API-Football', bool(API_FOOTBALL_KEY))}</span>
-        <span class="badge">{env_status('The Odds API', bool(THE_ODDS_API_KEY))}</span>
-        <span class="badge">{env_status('Sportmonks', bool(SPORTMONKS_API_TOKEN))}</span>
+st.markdown(
+    f"""
+<div class="z-topbar">
+  <div class="z-topbar-row">
+    <div class="z-brand">
+      <div class="z-brand-badge">{logo_html if logo_html else '⚽'}</div>
+      <div>
+        <div class="z-brand-title">ZOLA Elite</div>
+        <div class="z-brand-sub">Lectura en vivo, predicción directa y cuota de valor en una interfaz limpia.</div>
       </div>
     </div>
-    <div class="panel" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:white;">
-      <div style="font-size:.82rem;opacity:.9;text-transform:uppercase;font-weight:700;">Privacidad</div>
-      <div style="font-size:1rem;font-weight:800;margin-top:.2rem;">Las claves no se muestran al público</div>
-      <div style="font-size:.9rem;opacity:.92;margin-top:.25rem;">Esta versión solo lee las variables del servidor y no tiene campos visibles para API keys.</div>
+    <div class="z-topbar-right">
+      {status_chip('API-Football', api_ok)}
+      {status_chip('The Odds API', odds_ok)}
+      {status_chip('Sportmonks', sport_ok)}
     </div>
   </div>
 </div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True,
+)
 
-filters_left, filters_right = st.columns([1.1, 2.2], gap="medium")
-with filters_left:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    match_date = st.date_input("Fecha", value=date.today())
-    only_premium = st.toggle("Solo torneos top", value=True)
-    sport_key = st.selectbox("Mercado base", SPORT_KEY_SUGGESTIONS, index=0)
-    bankroll = st.number_input("Bankroll (S/)", min_value=1.0, value=DEFAULT_BANKROLL, step=50.0)
-    st.markdown('</div>', unsafe_allow_html=True)
+# ----------------------------
+# SETTINGS / ADMIN
+# ----------------------------
+with st.popover("⚙️ Configuración", use_container_width=False):
+    st.markdown("### Acceso de configuración")
+    if admin_password():
+        pw = st.text_input("Clave admin", type="password", key="admin_password_input")
+        if st.button("Ingresar", key="admin_login_btn"):
+            st.session_state.admin_ok = pw == admin_password()
+            if st.session_state.admin_ok:
+                st.success("Acceso habilitado")
+            else:
+                st.error("Clave incorrecta")
+    else:
+        st.session_state.admin_ok = True
+        st.info("No hay ADMIN_PASSWORD en Render. La configuración funciona libre en esta sesión.")
 
+    if st.session_state.admin_ok:
+        st.markdown("### Claves de sesión")
+        st.caption("Estas claves viven solo en tu sesión del navegador. Para dejarlo fijo, usa Render > Settings > Environment Variables.")
+        af = st.text_input("API Football", value=st.session_state.api_football_key_override, type="password")
+        oa = st.text_input("The Odds API", value=st.session_state.odds_api_key_override, type="password")
+        sm = st.text_input("Sportmonks", value=st.session_state.sportmonks_token_override, type="password")
+        if st.button("Guardar en esta sesión", key="save_session_keys"):
+            st.session_state.api_football_key_override = af.strip()
+            st.session_state.odds_api_key_override = oa.strip()
+            st.session_state.sportmonks_token_override = sm.strip()
+            st.success("Claves cargadas en esta sesión")
+        if st.button("Limpiar claves de sesión", key="clear_session_keys"):
+            st.session_state.api_football_key_override = ""
+            st.session_state.odds_api_key_override = ""
+            st.session_state.sportmonks_token_override = ""
+            st.success("Claves de sesión limpiadas")
+        st.markdown("### Tema")
+        st.radio("Modo visual", ["Sistema", "Claro"], index=1, horizontal=True, disabled=True)
+        st.caption("Esta versión está optimizada en claro tipo live-score.")
+
+# ----------------------------
+# INPUTS
+# ----------------------------
+left, right = st.columns([1, 2.1], gap="medium")
+with left:
+    with st.container(border=False):
+        match_date = st.date_input("Fecha", value=date.today())
+        only_premium = st.toggle("Solo torneos top", value=True)
+        sport_key = st.selectbox("Mercado base", SPORT_KEY_SUGGESTIONS, index=0)
+        bankroll = st.number_input("Bankroll (S/)", min_value=1.0, value=DEFAULT_BANKROLL, step=50.0)
+
+with right:
+    api_football_key = current_api_football_key()
+    fixture_lookup = {}
+    selected_fixture = None
+    labels = []
+    fixture_message = ""
+    if api_football_key:
+        try:
+            all_fixtures = fetch_today_fixtures(api_football_key, match_date)
+            if only_premium:
+                all_fixtures = [f for f in all_fixtures if is_premium_competition(f.get("league", {}).get("name", ""))]
+            for item in all_fixtures:
+                home = item.get("teams", {}).get("home", {}).get("name", "")
+                away = item.get("teams", {}).get("away", {}).get("name", "")
+                league = item.get("league", {}).get("name", "")
+                status = item.get("fixture", {}).get("status", {}).get("short", "")
+                lab = f"{home} vs {away} | {league} | {status}"
+                labels.append(lab)
+                fixture_lookup[lab] = item
+        except Exception as e:
+            fixture_message = f"No se pudieron cargar partidos del día: {e}"
+    else:
+        fixture_message = "Ingresa la API en Configuración o usa las variables de Render para cargar partidos automáticos."
+
+    if labels:
+        selected_label = st.selectbox("Partido del día", labels)
+        selected_fixture = fixture_lookup[selected_label]
+        default_match = f"{selected_fixture.get('teams', {}).get('home', {}).get('name', '')} vs {selected_fixture.get('teams', {}).get('away', {}).get('name', '')}"
+    else:
+        default_match = "Palmeiras vs Sporting Cristal"
+    manual_match = st.text_input("Partido manual", value=default_match)
+    run = st.button("Analizar partido", use_container_width=True)
+    if fixture_message:
+        st.caption(fixture_message)
+
+# ----------------------------
+# MAIN LOGIC
+# ----------------------------
+history_file_df = load_history_file()
+team_a_name, team_b_name = parse_match_query(manual_match)
 fixture = {}
 lineups = []
 stats_rows = []
 events_rows = []
 odds = {}
-api_message = None
-context = {"crowd_a":0.8,"crowd_b":0.2,"travel_a":0,"travel_b":1200,"rest_a":5,"rest_b":4,"fatigue_a":"Carga baja","fatigue_b":"Carga media"}
-selected_fixture = None
-team_a_name, team_b_name = "Palmeiras", "Sporting Cristal"
+context = {"crowd_a": 0.8, "crowd_b": 0.2, "travel_a": 0, "travel_b": 1200, "rest_a": 5, "rest_b": 4, "fatigue_a": "Baja", "fatigue_b": "Media"}
 
-with filters_right:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    fixture_lookup = {}
-    labels = []
-    if API_FOOTBALL_KEY:
-        try:
-            all_fixtures = fetch_today_fixtures(API_FOOTBALL_KEY, match_date)
-            if only_premium:
-                all_fixtures = [f for f in all_fixtures if is_premium_competition(f.get("league",{}).get("name",""))]
-            for item in all_fixtures:
-                home = item.get("teams",{}).get("home",{}).get("name","")
-                away = item.get("teams",{}).get("away",{}).get("name","")
-                league = item.get("league",{}).get("name","")
-                status = item.get("fixture",{}).get("status",{}).get("short","")
-                lab = f"{home} vs {away} | {league} | {status}"
-                labels.append(lab)
-                fixture_lookup[lab] = item
-        except Exception as e:
-            api_message = f"No pude cargar los partidos: {e}"
-    if labels:
-        selected_label = st.selectbox("Selecciona partido", labels, index=0)
-        selected_fixture = fixture_lookup[selected_label]
-        team_a_name = selected_fixture.get("teams",{}).get("home",{}).get("name","Equipo A")
-        team_b_name = selected_fixture.get("teams",{}).get("away",{}).get("name","Equipo B")
-        context = auto_context(team_a_name, team_b_name, selected_fixture)
-    else:
-        team_a_name, team_b_name = parse_match_query(st.text_input("Partido manual", value="Palmeiras vs Sporting Cristal"))
-    run = st.button("Analizar partido", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-if api_message:
-    st.warning(api_message)
+if selected_fixture:
+    context = auto_context(team_a_name, team_b_name, selected_fixture)
 
 if run:
-    if selected_fixture and API_FOOTBALL_KEY:
+    auto_error = None
+    if selected_fixture and api_football_key:
         try:
             fixture = selected_fixture
-            fixture_id = fixture.get("fixture",{}).get("id")
+            fixture_id = fixture.get("fixture", {}).get("id")
             if fixture_id:
-                lineups = fetch_lineups_api_football(API_FOOTBALL_KEY, fixture_id)
-                stats_rows = fetch_stats_api_football(API_FOOTBALL_KEY, fixture_id)
-                events_rows = fetch_events_api_football(API_FOOTBALL_KEY, fixture_id)
+                lineups = fetch_lineups_api_football(api_football_key, fixture_id)
+                stats_rows = fetch_stats_api_football(api_football_key, fixture_id)
+                events_rows = fetch_events_api_football(api_football_key, fixture_id)
         except Exception as e:
-            st.warning(f"No pude leer API-Football: {e}")
-    if THE_ODDS_API_KEY:
+            auto_error = f"No se pudo leer API-Football: {e}"
+
+    odds_api_key = current_odds_api_key()
+    if odds_api_key:
         try:
-            odds = fetch_odds_the_odds_api(THE_ODDS_API_KEY, sport_key, team_a_name, team_b_name)
+            odds = fetch_odds_the_odds_api(odds_api_key, sport_key, team_a_name, team_b_name)
         except Exception:
             odds = {}
 
@@ -547,143 +789,157 @@ if run:
 
     lambda_a, lambda_b = expected_goals(a_profile, b_profile)
     matrix = score_matrix(lambda_a, lambda_b, max_goals=6)
-    p_a,p_d,p_b = outcome_probabilities(matrix)
-    p_over,p_under = over_under_prob(matrix,2.5)
+    p_a, p_d, p_b = outcome_probabilities(matrix)
+    p_over, p_under = over_under_prob(matrix, 2.5)
     p_btts = both_teams_to_score(matrix)
-    score_rows = top_scores(matrix,10)
-    best_score,best_prob = score_rows[0]
+    score_rows = top_scores(matrix, 10)
+    best_score, best_prob = score_rows[0]
     dom_index = dominance_index(stats_a, stats_b)
-    signals = build_trader_signals(team_a_name, team_b_name, p_a,p_d,p_b,p_over,p_under,p_btts, odds, stats_a, stats_b, score_rows)
-    best_bet = best_bet_summary(odds,p_a,p_d,p_b,p_over,p_under,bankroll)
-
-    home_logo = fixture.get("teams",{}).get("home",{}).get("logo","") if fixture else ""
-    away_logo = fixture.get("teams",{}).get("away",{}).get("logo","") if fixture else ""
-    league_name = fixture.get("league",{}).get("name","Análisis de partido") if fixture else "Análisis de partido"
-    country_name = fixture.get("league",{}).get("country","") if fixture else ""
-    venue_name = fixture.get("fixture",{}).get("venue",{}).get("name","Sin estadio") if fixture else "Sin estadio"
-    kickoff = fixture.get("fixture",{}).get("date","") if fixture else ""
-
-    st.markdown(f"""
-    <div class="fixture-row">
-      <div class="fixture-head">
-        <div>
-          <div class="section-title">{league_name}</div>
-          <div class="meta">{country_name} · {venue_name}</div>
-        </div>
-        <div class="meta">{kickoff}</div>
-      </div>
-      <div class="teams-grid">
-        <div class="team-box">
-          {f'<img src="{home_logo}" />' if home_logo else ''}
-          <div class="team-name">{team_a_name}</div>
-          <div class="team-sub">Prob. ganar {p_a:.1%}</div>
-        </div>
-        <div class="center-box">
-          <div class="meta">Marcador proyectado</div>
-          <div style="font-size:2.2rem;font-weight:900;color:var(--text);">{best_score}</div>
-          <div class="meta">Empate {p_d:.1%}</div>
-        </div>
-        <div class="team-box">
-          {f'<img src="{away_logo}" />' if away_logo else ''}
-          <div class="team-name">{team_b_name}</div>
-          <div class="team-sub">Prob. ganar {p_b:.1%}</div>
-        </div>
-      </div>
-      <div class="prob-grid">
-        <div class="odds-card"><div class="label">1 · Gana local</div><div class="value">{p_a:.1%}</div><div class="sub">{odds.get('team_a_win','-')}</div></div>
-        <div class="odds-card"><div class="label">X · Empate</div><div class="value">{p_d:.1%}</div><div class="sub">{odds.get('draw','-')}</div></div>
-        <div class="odds-card"><div class="label">2 · Gana visita</div><div class="value">{p_b:.1%}</div><div class="sub">{odds.get('team_b_win','-')}</div></div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    top1, top2 = st.columns([1.45, 1], gap="medium")
-    with top1:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Mercados principales</div>', unsafe_allow_html=True)
-        market_rows = [
-            ("Gana local", p_a, odds.get("team_a_win")),
-            ("Empate", p_d, odds.get("draw")),
-            ("Gana visita", p_b, odds.get("team_b_win")),
-            ("Over 2.5", p_over, odds.get("over_2_5")),
-            ("Under 2.5", p_under, odds.get("under_2_5")),
-            ("BTTS Sí", p_btts, None),
-        ]
-        html = ['<div class="market-table"><table><thead><tr><th>Mercado</th><th>Modelo</th><th>Cuota</th><th>EV</th></tr></thead><tbody>']
-        for name, prob, odd in market_rows:
-            ev = expected_value(prob, odd) if odd else np.nan
-            ev_txt = '-' if np.isnan(ev) else f'{ev:.3f}'
-            odd_txt = '-' if not odd or (isinstance(odd,float) and np.isnan(odd)) else f'{odd:.2f}'
-            html.append(f'<tr><td>{name}</td><td>{prob:.1%}</td><td>{odd_txt}</td><td>{ev_txt}</td></tr>')
-        html.append('</tbody></table></div>')
-        st.markdown(''.join(html), unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="panel" style="margin-top:1rem;">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Top marcadores</div>', unsafe_allow_html=True)
-        score_df = pd.DataFrame(score_rows, columns=["Marcador", "Probabilidad"])
-        st.dataframe(score_df.style.format({"Probabilidad":"{:.1%}"}), use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with top2:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Resumen rápido</div>', unsafe_allow_html=True)
-        c1,c2,c3,c4 = st.columns(4)
-        c1.markdown(f'<div class="stat-card"><div class="k">Over 2.5</div><div class="v">{p_over:.1%}</div></div>', unsafe_allow_html=True)
-        c2.markdown(f'<div class="stat-card"><div class="k">BTTS</div><div class="v">{p_btts:.1%}</div></div>', unsafe_allow_html=True)
-        c3.markdown(f'<div class="stat-card"><div class="k">Dominancia</div><div class="v">{dom_index:.2f}</div></div>', unsafe_allow_html=True)
-        c4.markdown(f'<div class="stat-card"><div class="k">Mejor mercado</div><div class="v" style="font-size:1rem;">{best_bet[0] if best_bet else 'N/D'}</div></div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-top:1rem;"></div>', unsafe_allow_html=True)
-        if signals:
-            for level, text in signals[:4]:
-                render_signal(level, text)
-        else:
-            st.markdown('<div class="note">Todavía no hay señales claras para este partido.</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        st.markdown('<div class="panel" style="margin-top:1rem;">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Tabla de contexto</div>', unsafe_allow_html=True)
-        context_df = pd.DataFrame([
-            [team_a_name, lineup_readiness(lineup_a), context["travel_a"], context["rest_a"], context["fatigue_a"]],
-            [team_b_name, lineup_readiness(lineup_b), context["travel_b"], context["rest_b"], context["fatigue_b"]],
-        ], columns=["Equipo", "Estado", "Viaje km", "Descanso", "Fatiga"])
-        st.dataframe(context_df, use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    stats_left, stats_right = st.columns(2, gap="medium")
-    with stats_left:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Comparativa de equipos</div>', unsafe_allow_html=True)
-        compare_df = pd.DataFrame([
-            ["Tiros", stats_a["total_shots"], stats_b["total_shots"]],
-            ["Tiros al arco", stats_a["shots_on_goal"], stats_b["shots_on_goal"]],
-            ["Posesión", stats_a["possession"], stats_b["possession"]],
-            ["Corners", stats_a["corners"], stats_b["corners"]],
-            ["Amarillas", stats_a["yellow"], stats_b["yellow"]],
-            ["Rojas", stats_a["red"], stats_b["red"]],
-        ], columns=["Indicador", team_a_name, team_b_name])
-        st.dataframe(compare_df, use_container_width=True, hide_index=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with stats_right:
-        st.markdown('<div class="panel">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Historial de aprendizaje</div>', unsafe_allow_html=True)
-        if not history_file_df.empty:
-            st.dataframe(history_file_df.tail(10), use_container_width=True, hide_index=True)
-        else:
-            st.markdown('<div class="note">Todavía no hay historial guardado.</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    signals = build_trader_signals(team_a_name, team_b_name, p_a, p_d, p_b, p_over, p_under, p_btts, odds, stats_a, stats_b, score_rows)
+    best_bet = best_bet_summary(odds, p_a, p_d, p_b, p_over, p_under, bankroll)
+    confidence = pick_confidence(p_a, p_d, p_b, best_prob)
+    fixture_status = fixture.get("fixture", {}).get("status", {}).get("short", "PRE") if fixture else "PRE"
+    pred_headline, pred_conf, pred_style, pred_reasons = dynamic_ai_prediction(
+        team_a_name, team_b_name, p_a, p_d, p_b, best_score, confidence, stats_a, stats_b, odds, best_bet, fixture_status
+    )
+    pattern_text = pattern_summary(history_file_df, team_a_name, team_b_name)
 
     save_history_row({
         "match": f"{team_a_name} vs {team_b_name}",
         "prediction": best_score,
-        "team_a_win": round(p_a,4),
-        "draw": round(p_d,4),
-        "team_b_win": round(p_b,4),
+        "team_a_win": round(p_a, 4),
+        "draw": round(p_d, 4),
+        "team_b_win": round(p_b, 4),
         "best_market": best_bet[0] if best_bet else "",
-        "best_market_ev": round(best_bet[3],4) if best_bet else np.nan,
-        "league": league_name,
+        "best_market_ev": round(best_bet[3], 4) if best_bet else np.nan,
+        "league": fixture.get("league", {}).get("name", "") if fixture else "",
     })
 
+    team_a_logo = fixture.get("teams", {}).get("home", {}).get("logo", "") if fixture else ""
+    team_b_logo = fixture.get("teams", {}).get("away", {}).get("logo", "") if fixture else ""
+    league_logo = fixture.get("league", {}).get("logo", "") if fixture else ""
+    league_name = fixture.get("league", {}).get("name", "Partido manual") if fixture else "Partido manual"
+    kick = fixture.get("fixture", {}).get("date", "") if fixture else ""
+    venue = fixture.get("fixture", {}).get("venue", {}).get("name", "Sin estadio") if fixture else "Sin estadio"
+
+    pred_class = prediction_class(p_a, p_d, p_b)
+    badge_class, badge_text = prediction_badge(pred_class)
+    score_ga, score_gb = best_score.split("-")
+    bookmaker_name = odds.get("bookmaker", "Mercado sin operador") if odds else "Mercado sin operador"
+
+    match_head = f"""
+    <div class="z-match-head">
+      <div class="z-league">{remote_img(league_logo, 'z-league-logo')}<span>{league_name}</span></div>
+      <div class="z-match-grid">
+        <div class="z-team-box">{remote_img(team_a_logo, 'z-team-logo')}<div class="z-team-name">{team_a_name}</div><div class="z-team-sub">Prob. ganar {format_pct(p_a)}</div></div>
+        <div class="z-center-box">
+          <div class="z-score-pill">{score_ga} - {score_gb}</div>
+          <div class="z-kick">{fixture.get('fixture', {}).get('status', {}).get('elapsed', kick) if fixture else 'PRE'}</div>
+          <div class="z-meta">{venue}</div>
+          <div style="margin-top:10px;"><span class="z-score-pill {badge_class}">{badge_text}</span></div>
+        </div>
+        <div class="z-team-box">{remote_img(team_b_logo, 'z-team-logo')}<div class="z-team-name">{team_b_name}</div><div class="z-team-sub">Prob. ganar {format_pct(p_b)}</div></div>
+      </div>
+      <div class="z-outcome-grid">
+        <div class="z-outcome"><span>1 · GANA LOCAL</span><b>{format_pct(p_a)}</b></div>
+        <div class="z-outcome"><span>X · EMPATE</span><b>{format_pct(p_d)}</b></div>
+        <div class="z-outcome"><span>2 · GANA VISITA</span><b>{format_pct(p_b)}</b></div>
+      </div>
+    </div>
+    """
+    st.markdown(match_head, unsafe_allow_html=True)
+    if auto_error:
+        st.warning(auto_error)
+
+    a, b = st.columns([1.55, .95], gap="medium")
+    with a:
+        st.markdown('<div class="z-card">', unsafe_allow_html=True)
+        st.markdown('<div class="z-card-title">Predicción IA</div>', unsafe_allow_html=True)
+        st.markdown(f"<div class='z-alert {pred_style}'><b>{pred_headline}</b><br>Confianza {pred_conf}.</div>", unsafe_allow_html=True)
+        for reason in pred_reasons:
+            st.markdown(f"<div class='z-alert'>{reason}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='z-alert'>Patrón histórico: {pattern_text}</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with b:
+        st.markdown(f"""
+        <div class="z-market-best">
+          <small>MEJOR CUOTA DEL MOMENTO</small>
+          <div style="font-size:1.45rem;font-weight:900;margin-top:8px;">{best_bet[0] if best_bet else 'Sin cuota cargada'}</div>
+          <div style="font-size:2rem;font-weight:900;margin-top:6px;">{f'@ {best_bet[1]:.2f}' if best_bet else 'N/D'}</div>
+          <div style="margin-top:8px;">{f'EV {best_bet[3]:.3f} · Stake S/ {best_bet[4]:.2f}' if best_bet else 'Carga The Odds API para activar valor y stake.'}</div>
+          <div style="margin-top:10px;color:#cbd5e1;">Operador: {bookmaker_name}</div>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="z-card">
+          <div class="z-card-title">Resumen rápido</div>
+          <div class="z-mini-grid">
+            <div class="z-mini-card"><div class="k">OVER 2.5</div><div class="v">{format_pct(p_over)}</div></div>
+            <div class="z-mini-card"><div class="k">BTTS</div><div class="v">{format_pct(p_btts)}</div></div>
+            <div class="z-mini-card"><div class="k">DOMINANCIA</div><div class="v">{dom_index:.2f}</div></div>
+            <div class="z-mini-card"><div class="k">PREDICCIÓN</div><div class="v">{best_score}</div></div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    c1, c2 = st.columns([1.45, .95], gap="medium")
+    with c1:
+        df_market = pd.DataFrame([
+            [f"1 - {team_a_name}", p_a, odds.get("team_a_win") if odds else np.nan],
+            ["X - Empate", p_d, odds.get("draw") if odds else np.nan],
+            [f"2 - {team_b_name}", p_b, odds.get("team_b_win") if odds else np.nan],
+            ["Over 2.5", p_over, odds.get("over_2_5") if odds else np.nan],
+            ["Under 2.5", p_under, odds.get("under_2_5") if odds else np.nan],
+            ["BTTS Sí", p_btts, np.nan],
+        ], columns=["Mercado", "Modelo", "Cuota"])
+        df_market["EV"] = df_market.apply(lambda r: expected_value(r["Modelo"], r["Cuota"]), axis=1)
+        df_market["Valor"] = df_market["EV"].apply(lambda x: "🔥" if pd.notna(x) and x > 0 else "—")
+        with st.container(border=True):
+            st.markdown("### Mercados principales")
+            st.dataframe(df_market.style.format({"Modelo": "{:.1%}", "Cuota": "{:.2f}", "EV": "{:.3f}"}), use_container_width=True, hide_index=True)
+
+        score_df = pd.DataFrame(score_rows, columns=["Marcador", "Probabilidad"])
+        with st.container(border=True):
+            st.markdown("### Top marcadores")
+            st.dataframe(score_df.style.format({"Probabilidad": "{:.1%}"}), use_container_width=True, hide_index=True)
+
+    with c2:
+        with st.container(border=True):
+            st.markdown("### Tabla de contexto")
+            ctx_df = pd.DataFrame([
+                [team_a_name, lineup_readiness(lineup_a), context["travel_a"], context["rest_a"], context["fatigue_a"]],
+                [team_b_name, lineup_readiness(lineup_b), context["travel_b"], context["rest_b"], context["fatigue_b"]],
+            ], columns=["Equipo", "Estado", "Viaje km", "Descanso", "Fatiga"])
+            st.dataframe(ctx_df, use_container_width=True, hide_index=True)
+
+        with st.container(border=True):
+            st.markdown("### Comparativa de equipos")
+            compare_df = pd.DataFrame([
+                ["Tiros", stats_a["total_shots"], stats_b["total_shots"]],
+                ["Tiros al arco", stats_a["shots_on_goal"], stats_b["shots_on_goal"]],
+                ["Posesión", stats_a["possession"], stats_b["possession"]],
+                ["Corners", stats_a["corners"], stats_b["corners"]],
+                ["Amarillas", stats_a["yellow"], stats_b["yellow"]],
+                ["Rojas", stats_a["red"], stats_b["red"]],
+            ], columns=["Indicador", team_a_name, team_b_name])
+            st.dataframe(compare_df, use_container_width=True, hide_index=True)
+
+        with st.container(border=True):
+            st.markdown("### Balance visual")
+            comparisons = [
+                ("Posesión", stats_a["possession"], stats_b["possession"], "%"),
+                ("Tiros", stats_a["total_shots"], stats_b["total_shots"], ""),
+                ("Tiros al arco", stats_a["shots_on_goal"], stats_b["shots_on_goal"], ""),
+                ("Corners", stats_a["corners"], stats_b["corners"], ""),
+            ]
+            for title, va, vb, suf in comparisons:
+                total = max(va + vb, 1e-9)
+                share = va / total if total else 0.5
+                st.markdown(f"<div class='z-statline'><div class='z-statline-top'><span>{team_a_name} {va:.0f}{suf}</span><span><b>{title}</b></span><span>{team_b_name} {vb:.0f}{suf}</span></div><div class='z-statbar'><div class='z-statbar-fill' style='width:{share*100:.1f}%'></div></div></div>", unsafe_allow_html=True)
 else:
-    st.markdown('<div class="panel"><div class="section-title">Listo para análisis</div><div class="footer-note">Selecciona un partido y pulsa <b>Analizar partido</b>. Ya no se muestran claves ni paneles internos al público.</div></div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("### Centro de análisis")
+        st.write("Carga un partido del día o escribe uno manualmente. Luego pulsa **Analizar partido** para abrir la predicción, mercados y comparativas.")
+        st.write("La configuración de APIs está en **⚙️ Configuración**. Ahí puedes cargar claves solo para tu sesión o usar las variables de Render.")
